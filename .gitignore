@@ -218,3 +218,41 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Dados e modelos pesados: ficam sÃ³ na mÃ¡quina (o CSV tem ~10 GB e o GitHub recusa arquivos acima de 100 MB).
+# O deploy usa apenas models/modelo_final.joblib e output/transacoes_novas.csv.
+input/
+models/*
+!models/modelo_final.joblib
+
+# Saídas do retreino local (dados, modelos, notebook executado)
+retreino/dados/
+retreino/modelos/
+retreino/resultados/
+retreino/modelo_final/
+retreino/*.ipynb
+retreino/*.csv
+retreino/*.log
+
+# MLOps local: modelo campeão publicado, dados do Airflow e segredos do compose
+mlflow/producao/*
+!mlflow/producao/.gitkeep
+retreino/airflow/
+docker/.env
+
+# MLflow local (sem Docker): banco SQLite e artefatos
+mlflow/local/
+
+# Saídas pesadas de execuções locais (não versionar: o GitHub recusa arquivos acima de 100 MB)
+mlfow/dados/
+mlfow/modelos/
+mlfow/resultados/
+mlfow/modelo_final/
+mlfow/*.ipynb
+mlfow/*.csv
+mlfow/*.log
+catboost_info/
+**/catboost_info/
+output/*_previstas.csv
+output/alertas_de_fraude.csv
+output/transacoes_com_score.csv

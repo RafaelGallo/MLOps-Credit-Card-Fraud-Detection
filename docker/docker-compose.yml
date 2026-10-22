@@ -1,0 +1,122 @@
+name: fraude-mlops
+
+# Airflow (orquestra) + MLflow (experimentos e registro de modelos) + Streamlit (app), com um Postgres para os dois.
+# Uso (nesta pasta):  cp .env.example .env  ->  docker compose up --build
+
+x-airflow: &airflow
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  image: fraude-airflow:2.10.5
+  user: "${AIRFLOW_UID:-50000}:0"
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${POSTGRES_PASSWORD}@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_SECRET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+    PYTHONPATH: /opt/airflow/src
+    MLFLOW_TRACKING_URI: http://mlflow:5000
+    FRAUDE_ENTRADA: /opt/airflow/input
+    FRAUDE_TRABALHO: /opt/airflow/work
+    FRAUDE_PRODUCAO: /opt/airflow/producao
+  volumes:
+    - ../airflow/dags:/opt/airflow/dags
+    - ../src:/opt/airflow/src:ro
+    - ${DADOS_DIR:-../input}:/opt/airflow/input:ro
+    - ../retreino/airflow:/opt/airflow/work
+    - ../mlflow/producao:/opt/airflow/producao
+  depends_on:
+    postgres:
+      condition: service_healthy
+    mlflow:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-dados:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow", "-d", "airflow"]
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+
+  mlflow:
+    build: ../mlflow
+    image: fraude-mlflow:3.17.2
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri postgresql://airflow:${POSTGRES_PASSWORD}@postgres/mlflow
+      --artifacts-destination /mlflow/artifacts --serve-artifacts
+      --allowed-hosts "mlflow:5000,localhost:5000,127.0.0.1:5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-artefatos:/mlflow/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      retries: 10
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - >
+        airflow db migrate &&
+        airflow users create --username "${AIRFLOW_USER:-admin}" --password "${AIRFLOW_PASSWORD}"
+        --firstname Admin --lastname Local --role Admin --email admin@example.com || true
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 15s
+      retries: 10
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.app
+    image: fraude-app:latest
+    environment:
+      # modelo campeão publicado pela DAG; se o arquivo não existir, o app usa o modelo da imagem
+      FRAUDE_MODELO_PATH: /producao/modelo_final.joblib
+    volumes:
+      - ../mlflow/producao:/producao:ro
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+volumes:
+  postgres-dados:
+  mlflow-artefatos:

@@ -1,0 +1,8 @@
+# dependências do pipeline de treino (src/pipeline_treino.py), além das que a imagem do Airflow já traz
+# mlflow-skinny: só o cliente (o servidor roda no container do MLflow), evita conflitos com o Airflow
+mlflow-skinny==3.17.2
+# a mesma versão que o app usa para ler o modelo salvo (requirements.txt na raiz)
+scikit-learn==1.5.2
+polars
+pyarrow
+joblib

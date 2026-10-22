@@ -1,0 +1,21 @@
+# o contexto de build do app é a raiz do repositório: nada pesado pode entrar
+input/
+retreino/
+catboost_info/
+**/catboost_info/
+img/
+data/
+notebook/
+py/
+.venv/
+.git/
+**/__pycache__/
+*.ipynb
+.env
+
+# só o modelo incluído no repositório é copiado para a imagem do app
+models/*
+!models/modelo_final.joblib
+
+mlflow/producao/
+docker/.env
