@@ -1,7 +1,7 @@
 # MLOps: Credit Card Fraud Detection
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.5.2-F7931E?logo=scikitlearn&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-3776AB?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9.1-F7931E?logo=scikitlearn&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.66-FF4B4B?logo=streamlit&logoColor=white)
 ![Airflow](https://img.shields.io/badge/Airflow-2.10-017CEE?logo=apacheairflow&logoColor=white)
 ![MLflow](https://img.shields.io/badge/MLflow-3.17-0194E2?logo=mlflow&logoColor=white)
@@ -71,7 +71,7 @@ Design choices:
 - Steps exchange **files, not XCom payloads**, because the dataset has tens of millions of rows.
 - Training **never overwrites** the model in the repository. The DAG publishes the champion to `mlflow/producao/`, and the app prefers that
   file, falling back to `models/modelo_final.joblib`.
-- **One scikit-learn version everywhere** (`1.5.2`): the model is a pickle and only loads safely on the series that produced it.
+- **One scikit-learn version everywhere** (`1.9.1`): the model is a pickle, so the app, the Airflow image and the saved bundle use the same version. The bundle was re-saved with 1.9.1 after checking that its predictions are identical to the original 1.5.x ones (200,000 transactions, max difference 3e-16).
 
 ## 2. Model at a glance
 
@@ -166,7 +166,7 @@ Community Cloud runs **only the Streamlit app**. Airflow and MLflow need Docker 
 1. Push this repository to GitHub. The `.gitignore` already blocks the ~10 GB dataset and the heavy models; only `models/modelo_final.joblib` (1.6 MB) is tracked.
 2. On [share.streamlit.io](https://share.streamlit.io), sign in with GitHub and click **Create app**.
 3. Pick this repository, the `main` branch and the main file path **`app/streamlit_app.py`**.
-4. Under **Advanced settings**, select **Python 3.12** (`scikit-learn==1.5.2` is pinned in the root `requirements.txt`). The Python version can only be changed by recreating the app.
+4. Under **Advanced settings**, pick **Python 3.12** (recommended) or 3.14: the pinned versions in the root `requirements.txt` (`scikit-learn==1.9.1`) have wheels for both. The Python version can only be changed by recreating the app.
 5. Click **Deploy**. Every `git push` to the branch redeploys the app.
 
 To ship a newer champion to the cloud app, copy `mlflow/producao/modelo_final.joblib` over `models/modelo_final.joblib`, commit and push.

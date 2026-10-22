@@ -58,5 +58,5 @@ Portas locais: Airflow `8080`, MLflow `5000`, app `8501`.
 - **Os passos trocam arquivos, não dados pelo XCom**, porque a base tem dezenas de milhões de linhas.
 - **O app nunca é sobrescrito pelo treino.** A DAG publica o campeão em `mlflow/producao/`, e o app prefere esse
   arquivo, usando o modelo do repositório como alternativa.
-- **Mesma versão do scikit-learn em todo lugar** (`1.5.2`): o modelo é um pickle e só carrega com segurança na série
+- **Mesma versão do scikit-learn em todo lugar** (`1.9.1`): o modelo é um pickle e só carrega com segurança na série
   que o gerou.

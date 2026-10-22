@@ -52,7 +52,7 @@ streamlit run app/streamlit_app.py
    `models/modelo_final.joblib` e `output/transacoes_novas.csv`.
 2. Em [share.streamlit.io](https://share.streamlit.io), crie o app com o repositório, a branch `main` e o arquivo
    principal `app/streamlit_app.py`.
-3. Em **Advanced settings**, selecione **Python 3.12**. A versão só muda recriando o app.
+3. Em **Advanced settings**, selecione **Python 3.12** (recomendado) ou 3.14: as versões do equirements.txt têm pacotes para os dois. A versão do Python só muda recriando o app.
 
 O Community Cloud não roda Airflow nem MLflow: nele o app usa sempre o modelo do repositório.
 

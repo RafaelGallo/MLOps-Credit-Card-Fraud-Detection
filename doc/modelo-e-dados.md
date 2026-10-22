@@ -65,6 +65,6 @@ a diferença é pequena.
 ## Versões e o pickle
 
 O modelo é salvo com `joblib` (pickle). Carregar com outra série do scikit-learn gera aviso e pode dar resultados
-diferentes. Por isso `scikit-learn==1.5.2` está fixado no `requirements.txt` (app), em
+diferentes. Por isso `scikit-learn==1.9.1` está fixado no `requirements.txt` (app), em
 `docker/requirements-airflow.txt` (DAG) e no `.venv` do projeto. Se você retreinar numa versão nova, atualize
 os três.
