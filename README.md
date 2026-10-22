@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="img/Fluxo%20de%20Dados%20e%20Escudo%20Digital.png" alt="Credit card fraud detection: data flowing through a shield" width="100%">
-</p>
-
 # MLOps: Credit Card Fraud Detection
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
@@ -14,6 +10,8 @@
 ![Dataset](https://img.shields.io/badge/Dataset-34.6M_transactions-blueviolet)
 ![Data](https://img.shields.io/badge/Data-synthetic-lightgrey)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+![](https://github.com/RafaelGallo/MLOps-Credit-Card-Fraud-Detection/blob/main/img/Fluxo%20de%20Dados%20e%20Escudo%20Digital.png?raw=true)
 
 The **production side** of a credit card fraud detection project: an automated training pipeline (**Airflow**), experiment
 tracking and a model registry (**MLflow**), containers (**Docker Compose**) and a **Streamlit** app that scores transactions
